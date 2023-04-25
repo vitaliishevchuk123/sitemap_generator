@@ -7,7 +7,7 @@ services:
       - ./:/var/www/${APP_NAME}
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     ports:
-      - "8080:80"
+      - "8000:80"
     depends_on:
       - app
       - db
@@ -47,10 +47,23 @@ services:
       - '${DB_CONTAINER_PORT_TEST}:${DB_PORT}'
     container_name : ${APP_NAME}_db_test
 
-  npm:
-      image: node:latest
-      container_name: ${APP_NAME}_npm
-      volumes:
-          - ./:/var/www/${APP_NAME}
-      working_dir: /var/www/${APP_NAME}
-      entrypoint: [ 'npm', '--no-bin-links' ]
+#  node:
+#      image: node:alpine
+#      restart: unless-stopped
+#      container_name: ${APP_NAME}_node
+#      volumes:
+#          - ./:/var/www/${APP_NAME}
+#      working_dir: /var/www/${APP_NAME}
+#      entrypoint: ["npm"]
+#      depends_on:
+#          - db
+
+  redis:
+      image: redis:alpine
+      container_name: ${APP_NAME}_redis
+      restart: unless-stopped
+      command: redis-server
+      ports:
+          - "6379:6379"
+      depends_on:
+          - db
