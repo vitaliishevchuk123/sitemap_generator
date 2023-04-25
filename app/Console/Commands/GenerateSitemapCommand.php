@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Browsershot\Browsershot;
+use Spatie\Crawler\Crawler;
 use Spatie\Sitemap\SitemapGenerator;
 
 class GenerateSitemapCommand extends Command
@@ -25,7 +27,11 @@ class GenerateSitemapCommand extends Command
     public function handle()
     {
         $validated = $this->validate();
+        $browsershot = (new Browsershot())->noSandbox()->ignoreHttpsErrors();
         SitemapGenerator::create($validated['url'])
+            ->configureCrawler(function (Crawler $crawler) use ($browsershot){
+                $crawler->setBrowsershot($browsershot);
+            })
             ->getSitemap()->writeToDisk('public', md5($validated['url']) . '/sitemap.xml');
         $this->info('The URL is: ' . $validated['url']);
         $this->info('The Folder is: ' . url(md5($validated['url'])) . '/sitemap.xml');
